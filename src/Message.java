@@ -22,13 +22,14 @@ public class Message {
 
 	/**Keeps the peer from disconnecting */
 	public static byte[] keep_alive = {0};
-	/** */
+	
+	/**Resist Data Sharing*/
 	public static byte[] choke = {1,0};
-	/** */
+	/**Enable data sharing */
 	public static byte[] unchoke = {1,1};
-	/** */
+	/**show interest in a file */
 	public static byte[] intrested = {1,2};
-	/** */
+	/**show lack of interest in what the peer has to offer*/
 	public static byte[] uninterested = {1,3};
 	
 	

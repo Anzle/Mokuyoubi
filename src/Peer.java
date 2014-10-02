@@ -45,29 +45,8 @@ public class Peer {
 		//Commence the handshake
 		to_peer.write(Message.handshake(info_hash, peer_id));
 		
-		//At this point, the client should be ready to recieve messages from the user. 
+		//At this point, the client should be ready to receive messages from the user. 
 		
 	}
 	
-	
-	//These will be static functions that take a peer it wants to
-	//communicate with as input, then sends out the data to that peer
-	
-	//<length prefix><message ID><payload>
-	// keep-alive <0><><> prevents the peer from closing the connection
-	// choke <1><0><>
-	// unchoke <1><1><>
-	// interested <1><2><>
-	//uninterested <1><3><>
-	// have <5><4><Zero-Based Index/count from 0/ of the piece that has just been downloaded and verified>
-	// request <13><6>< <index><begin><length> >
-	   /*<index> is an integer specifying the zero-based piece index
-		* <begin> is an integer specifying the zero-based byte offset within the piece
-		* is typically 2^14 (16384) bytes. A smaller piece should only be used if the piece length is not divisible by 16384.
-		*/
-	// piece <9+X><7>< <index><begin><block>  >
-		/*<index> is an integer specifying the zero-based piece index
-		 * <begin> is an integer specifying the zero-based byte offset within the piece, and 
-		 * <block> which is a block of data, and is a subset of the piece specified by <index>
-		 */
 }
