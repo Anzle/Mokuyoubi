@@ -18,6 +18,9 @@
 		 * <begin> is an integer specifying the zero-based byte offset within the piece, and 
 		 * <block> which is a block of data, and is a subset of the piece specified by <index>
 		 */
+
+
+/**Message should do message validation as well, in my opinion*/
 public class Message {
 
 	/**Keeps the peer from disconnecting */
@@ -33,6 +36,11 @@ public class Message {
 	public static byte[] uninterested = {1,3};
 	
 	
+	/*The beginning of the handshake: this is always the same*/
+	private static byte[] handshake_header= {19,'B','i','t','T','o','r','r','e','n','t',
+											' ','p','r','o','t','o','c','o','l',
+											0,0,0,0,0,0,0,0};
+	
 	/** Perform the handshake between our client and the peer to begin connections
 	 * This method should be called from the Peer.java class
 	 * @param info_hash -> 20-byte SHA1 hash, peer_id->20-byte string
@@ -41,31 +49,10 @@ public class Message {
 	public static byte[] handshake(byte[] info_hash, byte[] peer_id){
 		byte[] hand_shake = new byte[68];
 		//<19><BitTorrent protocol><00000000>
-		hand_shake[0] = 19; 
-		hand_shake[1] = 'B';
-		hand_shake[2] = 'i';
-		hand_shake[3] = 't';
-		hand_shake[4] = 'T';
-		hand_shake[5] = 'o';
-		hand_shake[6] = 'r';
-		hand_shake[7] = 'r';
-		hand_shake[8] = 'e';
-		hand_shake[9] = 'n';
-		hand_shake[10] = 't';
-		hand_shake[11] = ' ';
-		hand_shake[12] = 'p';
-		hand_shake[13] = 'r';
-		hand_shake[14] = 'o';
-		hand_shake[15] = 't';
-		hand_shake[16] = 'o';
-		hand_shake[17] = 'c';
-		hand_shake[18] = 'o';
-		hand_shake[19] = 'l';
-		
-		//fill 20 -> 27 with '0's 
-		for(int i=0;i<8;i++)
-			hand_shake[20+i] = 0;
-		
+		//copy the handshake_header into the handshake message
+		for(int i = 0; i<handshake_header.length; i++)
+			hand_shake[i] = handshake_header[i];
+
 		//fill 28 - 47 with the SHA1 hash from info_hash
 		for(int i=0; i<20;i++)
 			hand_shake[28+i] = info_hash[i];
@@ -76,6 +63,29 @@ public class Message {
 		
 		//out handshake is completed, return it to the peer
 		return hand_shake;
+	}
+	
+	/** Check if the handshake message from a peer was a valid message. 
+	 * @param 
+	 * 		The handshake received from a peer
+	 * @return
+	 * 		True if it is valid, false otherwise
+	 * */
+	public static boolean validateHandshake(byte[] recieved_handshake,byte[] info_hash){
+		
+		//Check if the message is the correct size
+		if(recieved_handshake.length != 68 )
+			return false;
+		//Check if it has the proper heading
+		for(int i=0;i<handshake_header.length;i++)
+			if(recieved_handshake[i] != handshake_header[i])
+				return false;
+		//Check if it has the correct SHA1 hash
+		for(int i=0; i<info_hash.length;i++)
+			if(recieved_handshake[28+i] != info_hash[i])
+				return false;
+		//If those check out... we will just assume the peerID is correct, for right now
+		return true;
 	}
 	
 }//End of Message Class
