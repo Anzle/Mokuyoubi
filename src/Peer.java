@@ -103,18 +103,17 @@ public class Peer implements Comparable<Peer>{
 	 * @return
 	 * 		piece data wrapper for data
 	 */
-	private Piece readPeice() {
-		Piece p = new Piece();
+	private Block readPeice() {
+		int length = 0;
 		try {
-			p.setLength(from_peer.readInt());
+			length = from_peer.readInt();
 			byte messageID = from_peer.readByte();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		byte[] data = getResponse();
-		p.setData(data);
-		return p;
+		return new Block(data, length - 1);
 	}
 	
 	/**
@@ -149,7 +148,7 @@ public class Peer implements Comparable<Peer>{
 	 * @return
 	 * 		returns null if no data was downloaded. Piece object containing data and length info 
 	 */
-	public Piece requestPiece(int pieceIndex, int pieceOffset, int length) {
+	public Block requestBlock(int pieceIndex, int pieceOffset, int length) {
 		if(this.peer_choking){
 			return null;
 		}

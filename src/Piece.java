@@ -1,37 +1,35 @@
+import java.nio.ByteBuffer;
+
 /**
  * data wrapper for the storing piece download information
  * @author Rich
  *
  */
 public class Piece {
-	
-	private int length = 0;
-	private byte[] data = null;
-	
-	/**
-	 * set piece length
-	 * 
-	 * @param i length in bytes
-	 */
-	public void setLength(int i){
-		this.length = i;
-	}
-	
-	/**
-	 * sets data if piece
-	 * 
-	 * @param data byte[] of data
-	 */
-	public void setData(byte[] data){
-		this.data = data;
-	}
 
-	/**
-	 * Retrieves byte[] data
-	 * @return piece byte data
-	 */
-	public byte[] getData() {
-		return data;
+	private Block[] blocks;
+	private final int pieceSize;
+	
+	public Piece(int numblocks, int pieceSize){
+		this.blocks = new Block[numblocks];
+		this.pieceSize = pieceSize;
+	}
+	
+	public void addBlock(Block b, int i){
+		this.blocks[i] = b;
+	}
+	
+	public byte[] getData(){
+		if(blocks == null)
+			return null;
+		ByteBuffer ret = ByteBuffer.allocate(pieceSize);
+		for(Block b : blocks){
+			if(b == null){
+				return null;
+			}
+			ret.put(b.getData());
+		}
+		return null;
 	}
 
 }

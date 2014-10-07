@@ -55,13 +55,22 @@ public class TorrentHandler {
 						int pLen = pieceLength(pieceIndex);
 						int left = pLen;
 						int length = Math.min(MAX_PIECE_LENGTH, left);
+						int numBlocks = pLen / length;
+						if(pLen % length > 0)
+							numBlocks++;
+						Piece piece = new Piece(numBlocks, pLen);
+						int bindex = 0;
 						while(left > 0){
-							Piece piece = p.requestPiece(pieceIndex, offset, length);
-							file.write(piece.getData(), pLen * pieceIndex + offset);
+							Block b = p.requestBlock(pieceIndex, offset, length);
+							piece.addBlock(b, bindex);
 							offset += length;
 							left -= length;
 							length = Math.min(MAX_PIECE_LENGTH, left);
+							bindex++;
 						}
+						byte[] data = piece.getData();
+						if(data != null)
+							file.write(data, torInfo.piece_length * pieceIndex + offset);
 					}
 				}
 				
