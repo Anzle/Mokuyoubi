@@ -1,3 +1,5 @@
+import java.nio.ByteBuffer;
+
 	
 	//These will be static functions that will produce the needed messages
 	
@@ -86,6 +88,24 @@ public class Message {
 				return false;
 		//If those check out... we will just assume the peerID is correct, for right now
 		return true;
+	}
+	
+	/**
+	 * Generate the block request message to request part of a block from the peer
+	 * @param pieceIndex piece of the file to download part of
+	 * @param pieceOffset distance into the piece to start downloading
+	 * @param length length in bytes of data to download starting at the offset
+	 * @return byte array of the finished message
+	 */
+	public static byte[] buildRequest(int pieceIndex, int pieceOffset, int length) {
+		//message is 14 long including length byte
+		ByteBuffer responseBuff = ByteBuffer.allocate(14);
+		responseBuff.put((byte)13); //set length
+		responseBuff.put((byte)6); //set messageID
+		responseBuff.putInt(pieceIndex); //<index>
+		responseBuff.putInt(pieceOffset); //<offset>
+		responseBuff.putInt(length); //<block>
+		return responseBuff.array();
 	}
 	
 }//End of Message Class
