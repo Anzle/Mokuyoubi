@@ -183,4 +183,30 @@ public class Peer implements Comparable<Peer>{
 		return 0;
 	}
 
+	/** Send this message to keep the Peer connection active; sent every two minutes if not other message sent*/
+	public void keepAlive(){ sendMessage(Message.keep_alive);}
+	
+	/**Inform the Peer that you are not accepting at this time*/
+	public void choke(){ 
+		sendMessage(Message.choke);
+		this.am_choking = true;}
+	
+	/**Inform the Peer that we are once again accepting messages*/
+	public void unchoke(){ 
+		sendMessage(Message.unchoke);
+		this.am_choking = false;}
+	
+	/** Inform the Peer that we are interested in them.
+	 * Like... Hey Sexy; how about we go somewhere private and transfer some files*/
+	public void interested(){ 
+		sendMessage(Message.intrested);
+		this.am_interested = true;
+	}
+	
+	/** Inform the Peer that we aren't interested in what they have
+	 * LIke... You're a nice Peer and all, but I'm... not looking for a relationship 
+	 * */
+	public void uninterested(){
+		sendMessage(Message.uninterested);
+		this.am_interested = false;}
 }
