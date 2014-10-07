@@ -3,11 +3,12 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Scanner;
 
+import GivenTools.Bencoder2;
 import GivenTools.BencodingException;
+import GivenTools.TorrentInfo;
+import GivenTools.ToolKit;
 
 
 public class main{
@@ -80,24 +81,21 @@ public class main{
 		System.err.println(e.getMessage());
 	}
 
+	//tbytes is the byte array with all metainfo
 	
-	
-	
-	
+	URL getlist=null;
 	
 	try {
-		Object alpha= Bencoder2.getInfoBytes(tbytes);
-		System.out.println(alpha);
+		TorrentInfo alltinfo=new TorrentInfo(tbytes);
 		
-		alpha= Bencoder2.decode(tbytes);
-	
-		System.out.println(alpha);
+		System.out.println("file name: "+alltinfo.file_name);
 		
-		//TorrentInfo.KEY_ANNOUNCE;
+		getlist=alltinfo.announce_url;
 		
+		ToolKit tkit= new ToolKit();
 		
+		tkit.print(alltinfo.torrent_file_map);// this is only used to debug and print the map
 		
-	
 	
 	} catch (BencodingException e) {
 		
@@ -105,30 +103,16 @@ public class main{
 	}
 	
 	
+	// PART 3 STARTS HERE-
 	
-	// part 3 -
+	//Variable getlist is the URL to connect to
 	
-	String IPaddress="given by previous";
-	int portnum=43;
-	
-	/*
-	try {
-		//URL rtracker= new URL(IPaddress);
-	
-	
-	} catch (MalformedURLException e) {
-		
-		e.printStackTrace();
-	}
-	
-	*/
-	
-	
-	
-	
+	System.out.println("THE URL IS: "+getlist);
 	
 	
 	
 	}
+
+	
 
 }
