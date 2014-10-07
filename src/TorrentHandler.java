@@ -17,6 +17,13 @@ public class TorrentHandler {
 	
 	private FileBuilder file;
 	
+	/**
+	 * Constructor. sets up instance of class
+	 * 
+	 * @param torInfo TorrentInfo object from the .torrent file
+	 * @param tracker reference to the tracker to pull new peers from
+	 * @param outputfile output file location where the finished file will be saved
+	 */
 	public TorrentHandler(TorrentInfo torInfo, Tracker tracker, String outputfile){
 		this.torInfo = torInfo;
 		this.bitfield = new boolean[this.torInfo.piece_hashes.length];
@@ -25,6 +32,13 @@ public class TorrentHandler {
 		this.file = new FileBuilder(outputfile, torInfo.file_length);
 	}
 	
+	/**
+	 * Manages downloading the files pieces from the peers
+	 * 
+	 * @return
+	 * 		true - operation completes successfully
+	 * 		false - an error was caught during execution causing the download to fail
+	 */
 	public boolean download(){
 		
 		while(running){
@@ -60,7 +74,13 @@ public class TorrentHandler {
 		
 		return true;
 	}
-
+	
+	/**
+	 * Calculated the size of a piece to download
+	 * 
+	 * @param pieceIndex indexof the peice
+	 * @return number of bytes in length the piece is as an integer 
+	 */
 	private int pieceLength(int pieceIndex) {
 		int length = 0;
 		if(pieceIndex == this.bitfield.length - 1){
@@ -70,7 +90,13 @@ public class TorrentHandler {
 			length = this.torInfo.piece_length;
 		return length;
 	}
-
+	
+	/**
+	 * Finds the next piece the the client needs and the peer has
+	 * 
+	 * @param p peer the user is connecting with
+	 * @return int index of the next piece to download
+	 */
 	private int getNextPiece(Peer p) {
 		boolean[] peerBitfield = p.getBitfield();
 		for(int i = 0; i < bitfield.length; i++){
@@ -82,6 +108,14 @@ public class TorrentHandler {
 		return -1;
 	}
 	
+	/**
+	 * Saves a finished data byte array for a piece to the file.
+	 * 
+	 * @param piece index of the piece
+	 * @param data byte[] data of the file to be written
+	 * @return
+	 * 		return true if data is written and false if an error is caught
+	 */
 	public boolean savePiece(int piece, byte[] data){
 		return file.write(data, piece * torInfo.piece_length);
 	}

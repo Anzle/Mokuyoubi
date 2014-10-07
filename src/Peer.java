@@ -82,6 +82,11 @@ public class Peer implements Comparable<Peer>{
 		}
 	}
 	
+	/**
+	 * gets full buffer from peer's data stream
+	 * @return
+	 * 	byte[] buffer of data
+	 */
 	private byte[] getResponse() {
 		byte[] ret = null;
 		try {
@@ -93,6 +98,11 @@ public class Peer implements Comparable<Peer>{
 		return null;
 	}
 
+	/**
+	 * Reads a block of file data
+	 * @return
+	 * 		piece data wrapper for data
+	 */
 	private Piece readPeice() {
 		Piece p = new Piece();
 		try {
@@ -106,19 +116,39 @@ public class Peer implements Comparable<Peer>{
 		p.setData(data);
 		return p;
 	}
-
+	
+	/**
+	 * test if peer is connected
+	 * @return
+	 */
 	public boolean isAlive() {
 		return alive;
 	}
-
+	
+	/**
+	 * test if client is waiting for data from the peer
+	 * @return
+	 */
 	public boolean isBusy() {
 		return busy;
 	}
 	
+	/**
+	 * get data bitfield of pieces that the peer has
+	 * @return boolean[] bitfield
+	 */
 	public boolean[] getBitfield(){
 		return bitfield;
 	}
-
+	
+	/**
+	 * sends request to peers for a piece of the file
+	 * @param pieceIndex piece index
+	 * @param pieceOffset position in peice to start downloading
+	 * @param length length in bytes to request from peer
+	 * @return
+	 * 		returns null if no data was downloaded. Piece object containing data and length info 
+	 */
 	public Piece requestPiece(int pieceIndex, int pieceOffset, int length) {
 		if(this.peer_choking){
 			return null;
