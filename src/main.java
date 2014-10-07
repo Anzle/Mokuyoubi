@@ -1,8 +1,12 @@
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import GivenTools.Bencoder2;
@@ -41,44 +45,37 @@ public class main{
 	File file = new File(tfile);
 	long fsize = -1;
 	byte[] tbytes = null;
-	InputStream file_stream;
+	InputStream fstream;
 
 	try
 	{
-		file_stream = new FileInputStream(file);
+		fstream = new FileInputStream(file);
 		fsize = file.length();
 		
 		// Initialize the byte array for the file's data
 		tbytes = new byte[(int) fsize];
 
-		int offset = 0;
-		int aread = 0;
+		int point = 0;
+		int done = 0;
 
 		// Read from the file
-		while (offset < tbytes.length
-				&& (aread = file_stream.read(tbytes, offset,
-						tbytes.length - offset)) >= 0)
+		while (point < tbytes.length
+				&& (done = fstream.read(tbytes, point,
+						tbytes.length - point)) >= 0)
 		{
-			offset += aread;
+			point += done;
 		}
 
-		file_stream.close();
+		fstream.close();
 
 	}
 	catch (FileNotFoundException e)
 	{
-		System.err
-				.println("Error: [TorrentFileHandler.java] The file \""
-						+ tfile
-						+ "\" does not exist. Please make sure you have the correct path to the file.");
 		return;
 	}
 	catch (IOException e)
 	{
-		System.err
-				.println("Error: [TorrentFileHandler.java] There was a general, unrecoverable I/O error while reading from \""
-						+ tfile + "\".");
-		System.err.println(e.getMessage());
+		return;
 	}
 
 	//tbytes is the byte array with all metainfo
@@ -109,6 +106,30 @@ public class main{
 	
 	System.out.println("THE URL IS: "+getlist);
 	
+	 
+	URL urlobj;
+	try {
+		urlobj = new URL(getlist.toString());
+	
+     HttpURLConnection uconnect = (HttpURLConnection) urlobj.openConnection();
+     uconnect.setRequestMethod("GET");
+     //int responseCode = uconnect.getResponseCode();
+
+     BufferedReader in = new BufferedReader(
+             new InputStreamReader(uconnect.getInputStream()));
+     String inline;
+     StringBuffer response = new StringBuffer();
+
+     while ((inline = in.readLine()) != null) {
+         response.append(inline);
+     }
+     in.close(); 
+     
+	} catch (MalformedURLException e) {
+		e.printStackTrace();
+	} catch (IOException e) {
+		e.printStackTrace();
+	}
 	
 	
 	}
