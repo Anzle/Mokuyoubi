@@ -3,6 +3,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Scanner;
 
 import GivenTools.BencodingException;
@@ -90,6 +92,11 @@ public class main{
 		alpha= Bencoder2.decode(tbytes);
 	
 		System.out.println(alpha);
+		
+		//TorrentInfo.KEY_ANNOUNCE;
+		
+		
+		
 	
 	
 	} catch (BencodingException e) {
@@ -99,9 +106,22 @@ public class main{
 	
 	
 	
+	// part 3 -
+	
+	String IPaddress="given by previous";
+	int portnum=43;
+	
+	/*
+	try {
+		//URL rtracker= new URL(IPaddress);
 	
 	
+	} catch (MalformedURLException e) {
+		
+		e.printStackTrace();
+	}
 	
+	*/
 	
 	
 	
