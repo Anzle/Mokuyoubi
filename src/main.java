@@ -83,7 +83,19 @@ public class main{
 	
 	
 	
+	try {
+		Object alpha= Bencoder2.getInfoBytes(tbytes);
+		System.out.println(alpha);
+		
+		alpha= Bencoder2.decode(tbytes);
 	
+		System.out.println(alpha);
+	
+	
+	} catch (BencodingException e) {
+		
+		e.printStackTrace();
+	}
 	
 	
 	
