@@ -28,12 +28,13 @@ public class Tracker {
 	public Tracker(TorrentInfo torinfo, PeerHost host) {
 		this.torinfo = torinfo;
 		this.host = host;
+		this.host.makeBitField(torinfo.piece_hashes.length);
 		this.url = torinfo.announce_url;
 		info_hash = torinfo.info_hash.array();
 		
 	}
 	
-	private void getPeers() throws IOException{
+	private void getPeers(TorrentHandler handler) throws IOException{
 		String ih_str = "";
 
 		for (int i = 0; i < info_hash.length; i++) {
@@ -52,8 +53,6 @@ public class Tracker {
 
 		String query = "announce?info_hash=" + ih_str + "&peer_id=" + host.getPeerID() + "&port=" + host.getPort() + "&left=" + torinfo.file_length + "&uploaded=0&downloaded=0";
 
-		System.out.println("file name: " + torinfo.file_name);
-
 		// ToolKit.print(alltinfo.torrent_file_map);// this is only used to
 		// debug
 		// and print the map
@@ -68,8 +67,6 @@ public class Tracker {
 		byte[] tracker_response = null;
 
 		urlobj = new URL(url, query);
-		
-		System.out.println("THE URL IS: " + urlobj.toString());
 
 		HttpURLConnection uconnect = (HttpURLConnection) urlobj.openConnection();
 		uconnect.setRequestMethod("GET");
@@ -99,36 +96,21 @@ public class Tracker {
 			ByteBuffer pid_key = ByteBuffer.wrap("peer id".getBytes());
 			ByteBuffer port_key = ByteBuffer.wrap("port".getBytes());
 			ArrayList<HashMap<ByteBuffer, Object>> list = (ArrayList<HashMap<ByteBuffer, Object>>) h.get(b);
-			System.out.println("peer count: " + list.size());
 			for(HashMap<ByteBuffer, Object> p_info : list){
 				String ip = new String(((ByteBuffer) p_info.get(ip_key)).array());
 				byte[] pid = ((ByteBuffer) p_info.get(pid_key)).array();
 				int port = (int) p_info.get(port_key);
 				
-				Peer newPeer = null;
-				try {
-					System.out.println("peer: " + ip);
-					newPeer = new Peer(ip, port, host.getPeerID().getBytes(), torinfo.info_hash.array(), pid_key.array());
-				//Make the Peer send the handshake message
-					newPeer.sendHandshake();
-				} catch (Exception e) {
-					newPeer = null;
-					System.err.println("reason: " + e.getMessage());
-					e.printStackTrace();
-					System.out.println("peer failed");
-				}
-				
+				Peer newPeer = new Peer(ip, port, host.getPeerID().getBytes(), torinfo.info_hash.array(), pid_key.array(), host, handler);
+
 				if(newPeer != null){
-					ToolKit.print(p_info);
 					peers.add(newPeer);
 				}
 			}
-			System.out.println("done");
 		} catch (BencodingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		System.out.println("response from tracker in the form of byte[]: " + tracker_response);
 		
 	}
 
@@ -137,15 +119,19 @@ public class Tracker {
 	 * 
 	 * @return list of currently connected peers
 	 */
-	public ArrayList<Peer> requestPeers() {
+	public ArrayList<Peer> requestPeers(TorrentHandler handler) {
 		// TODO
 		try {
-			getPeers();
+			getPeers(handler);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return peers;
+	}
+	
+	public PeerHost getHost(){
+		return host;
 	}
 
 }

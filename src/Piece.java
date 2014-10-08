@@ -71,4 +71,21 @@ public class Piece {
 		
 		return true;
 	}
+
+	public int getNextBlock() {
+		for(int i = 0; i < this.blocks.length; i++){
+			if(blocks[i] == null)
+				return i;
+		}
+		return -1;
+		
+	}
+
+	public int getLength() {
+		return pieceSize;
+	}
+
+	public int numBlocks() {
+		return this.blocks.length;
+	}
 }

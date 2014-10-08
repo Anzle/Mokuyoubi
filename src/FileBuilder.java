@@ -1,6 +1,8 @@
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Random access file wrapper to simplify writing to the file
@@ -11,7 +13,6 @@ import java.io.RandomAccessFile;
 public class FileBuilder {
 	
 	private RandomAccessFile file;
-	
 	/**
 	 * Constructor
 	 * 
@@ -47,7 +48,7 @@ public class FileBuilder {
 	}
 	
 	/**
-	 * save and close the file pointer after the file is finsihed being written to
+	 * save and close the file pointer after the file is finished being written to
 	 */
 	public void close(){
 		try {

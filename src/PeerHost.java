@@ -9,9 +9,11 @@ public class PeerHost extends Thread{
 	private ServerSocket socket;
 	private int port;
 	private String peer_id;
+	private boolean[] bitfield;
 	
 	public PeerHost(){
-		
+		this.bitfield = new boolean[0];
+
 		for(int i = 1; i < 10; i++){
 			port = 6880 + i;
 			try {
@@ -58,5 +60,18 @@ public class PeerHost extends Thread{
 	
 	public int getPort(){
 		return port;
+	}
+
+	public boolean[] getBitfield() {
+		return bitfield;
+	}
+	
+	public void setHave(int index){
+		if(index < this.bitfield.length)
+			this.bitfield[index] = true;
+	}
+
+	public void makeBitField(int length) {
+		this.bitfield = new boolean[length];
 	}
 }

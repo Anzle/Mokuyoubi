@@ -120,12 +120,22 @@ public class Message {
 	 */
 	public static byte[] buildRequest(int pieceIndex, int pieceOffset, int length) {
 		//message is 14 long including length byte
-		ByteBuffer responseBuff = ByteBuffer.allocate(14);
-		responseBuff.put((byte)13); //set length
+		ByteBuffer responseBuff = ByteBuffer.allocate(17);
+		responseBuff.putInt((int)13); //set length
 		responseBuff.put((byte)6); //set messageID
 		responseBuff.putInt(pieceIndex); //<index>
 		responseBuff.putInt(pieceOffset); //<offset>
 		responseBuff.putInt(length); //<block>
+		return responseBuff.array();
+	}
+
+	public static byte[] haveMessage(int index) {
+
+		//message is 14 long including length byte
+		ByteBuffer responseBuff = ByteBuffer.allocate(14);
+		responseBuff.putInt(5); //set length
+		responseBuff.put((byte)4); //set messageID
+		responseBuff.putInt(index); //<payload>
 		return responseBuff.array();
 	}
 	

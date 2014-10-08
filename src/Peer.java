@@ -21,6 +21,9 @@ public class Peer implements Runnable{
 	private int port_number;
 	private byte[] peer_id;
 	private byte[] info_hash;
+	private TorrentHandler handler;
+	
+	private PeerHost host;
 	
 	/*Our peer ID, foe handshakes*/
 	private byte[] my_id;
@@ -42,14 +45,15 @@ public class Peer implements Runnable{
 	/** Peer creates a connects to a peer that we desire to download the file from.
 	 * @throws an exception when attempting to connect. If it fails, the main file should try
 	 * to contact a separate peer or something*/
-	public Peer(String ipaddress, int port, byte[] my_id, byte[] info_hash, byte[] peer_id){
+	public Peer(String ipaddress, int port, byte[] my_id, byte[] info_hash, byte[] peer_id, PeerHost host, TorrentHandler handler){
 		//peer connection information
 		peer_ip = ipaddress;
 		port_number = port;
 		this.info_hash = info_hash;
 		this.peer_id = peer_id;
 		this.my_id = my_id;
-		
+		this.host = host;
+		this.handler = handler;
 		//Establish connection with a peer
 		//System.out.println("Attempting to connect to:" + ipaddress);
 		
@@ -76,9 +80,54 @@ public class Peer implements Runnable{
 		}
 		sendHandshake();
 		System.out.println("peer(" + peer_ip + ") connected");
+		this.unchoke();
 		this.interested();
 		System.out.println("peer(" + peer_ip + ") interested");
 		alive = true;
+
+		try {
+			while (alive) {
+
+				int length = from_peer.readByte();
+				byte messageID = from_peer.readByte();
+				
+				switch (messageID){
+				case 0:
+					break;
+				case 1:
+					this.peer_choking = true;
+					break;
+				case 2:
+					this.peer_choking = false;
+					break;
+				case 3:
+					this.peer_interested = true;
+					break;
+				case 4:
+					this.peer_interested = false;
+					break;
+				case 5:
+				case 6:
+					break;
+				case 7:
+					int piece = from_peer.readInt();
+					int offset = from_peer.readInt();
+					byte[] data = new byte[length - 9];
+					from_peer.readFully(data);
+					Block block = new Block(data, piece, offset);
+					this.handler.save(block);
+					break;
+				default:
+					System.err.println("invalid messageID form peer " + this.peer_ip);
+					break;
+				
+				}
+			}
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	private void connect() throws IOException{
@@ -128,40 +177,6 @@ public class Peer implements Runnable{
 	}
 	
 	/**
-	 * gets full buffer from peer's data stream
-	 * @return
-	 * 	byte[] buffer of data
-	 */
-	private byte[] getResponse() {
-		byte[] ret = null;
-		try {
-			from_peer.readFully(ret);
-			return ret;
-		} catch (IOException e) {
-			System.err.println("Error reading from peer located at " + this.peer_ip + ":" + this.port_number + "(peerID: " + this.peer_id.toString() + ")");
-		}
-		return null;
-	}
-
-	/**
-	 * Reads a block of file data
-	 * @return
-	 * 		piece data wrapper for data
-	 */
-	private Block readPeice() {
-		int length = 0;
-		try {
-			length = from_peer.readInt();
-			byte messageID = from_peer.readByte();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		byte[] data = getResponse();
-		return new Block(data, length - 1);
-	}
-	
-	/**
 	 * test if peer is connected
 	 * @return
 	 */
@@ -193,15 +208,14 @@ public class Peer implements Runnable{
 	 * @return
 	 * 		returns null if no data was downloaded. Piece object containing data and length info 
 	 */
-	public Block requestBlock(int pieceIndex, int pieceOffset, int length) {
+	public void requestBlock(int pieceIndex, int pieceOffset, int length) {
 		if(this.peer_choking){
-			return null;
+			return;
 		}
 		//busy = true;
 		
 		byte[] message = Message.buildRequest(pieceIndex, pieceOffset, length);
 		sendMessage(message);
-		return readPeice();
 		//TODO
 	}
 

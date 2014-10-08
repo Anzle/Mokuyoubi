@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Vector;
 
 import GivenTools.TorrentInfo;
@@ -11,8 +12,9 @@ public class TorrentHandler {
 	private TorrentInfo torInfo = null;
 	private Tracker tracker = null;
 	private ArrayList<Peer> currentPeers = null;
+
+	private HashMap<Integer,Piece> pieces;
 	
-	private boolean[] bitfield;
 	private boolean error_death;
 	private boolean running;
 	private int pieceIndex;
@@ -27,9 +29,9 @@ public class TorrentHandler {
 	 * @param outputfile output file location where the finished file will be saved
 	 */
 	public TorrentHandler(TorrentInfo torInfo, Tracker tracker, String outputfile){
+		this.pieces = new HashMap<Integer,Piece>();
 		this.torInfo = torInfo;
 		this.tracker = tracker;
-		this.bitfield = new boolean[this.torInfo.piece_hashes.length];
 		this.running = true;
 		this.error_death = false;
 		this.file = new FileBuilder(outputfile, torInfo.file_length);
@@ -45,7 +47,7 @@ public class TorrentHandler {
 	 */
 	public boolean download(){
 		while(running){
-			ArrayList<Peer> peers = tracker.requestPeers();
+			ArrayList<Peer> peers = tracker.requestPeers(this);
 
 			for(Peer p : peers){
 				if(!currentPeers.contains(p)){
@@ -60,27 +62,25 @@ public class TorrentHandler {
 				if(p.isAlive() && !p.isBusy()){
 					pieceIndex = getNextPiece(p);
 					if(pieceIndex >= 0){
-						int offset = 0;
-						int pLen = pieceLength(pieceIndex);
-						int left = pLen;
-						int length = Math.min(MAX_PIECE_LENGTH, left);
-						int numBlocks = pLen / length;
-						if(pLen % length > 0)
-							numBlocks++;
-						Piece piece = new Piece(numBlocks, pLen);
-						int bindex = 0;
-						while(left > 0){
-							System.out.println("Block reqquested from " + p.getIP() + " - Piece " + pieceIndex + ", Block " + bindex);
-							Block b = p.requestBlock(pieceIndex, offset, length);
-							piece.addBlock(b, bindex);
-							offset += length;
-							left -= length;
-							length = Math.min(MAX_PIECE_LENGTH, left);
-							bindex++;
+						Piece piece = this.getPiece(pieceIndex);
+						if(piece == null){
+
+							int pLen = pieceLength(pieceIndex);
+							int numBlocks = pLen / MAX_PIECE_LENGTH;
+							if(pLen % MAX_PIECE_LENGTH > 0)
+								numBlocks++;
+							piece = new Piece(numBlocks, pLen);
+							save(piece, pieceIndex);
 						}
-						byte[] data = piece.getData();
-						if(data != null)
-							file.write(data, torInfo.piece_length * pieceIndex + offset);
+						int blockid = piece.getNextBlock();
+						if(blockid >= 0)
+							continue;
+						int length = 0;
+						if(blockid == piece.numBlocks() - 1)
+							length = Math.min(MAX_PIECE_LENGTH, piece.getLength() % MAX_PIECE_LENGTH);
+						if(length == 0)
+							length = MAX_PIECE_LENGTH;
+						p.requestBlock(pieceIndex, blockid * MAX_PIECE_LENGTH, length);
 					}
 				}
 			}
@@ -101,7 +101,7 @@ public class TorrentHandler {
 	 */
 	private int pieceLength(int pieceIndex) {
 		int length = 0;
-		if(pieceIndex == this.bitfield.length - 1){
+		if(pieceIndex == this.torInfo.piece_hashes.length - 1){
 			length = this.torInfo.file_length % this.torInfo.piece_length;
 		}
 		if(length == 0)
@@ -117,6 +117,7 @@ public class TorrentHandler {
 	 */
 	private int getNextPiece(Peer p) {
 		boolean[] peerBitfield = p.getBitfield();
+		boolean[] bitfield = tracker.getHost().getBitfield();
 		if(peerBitfield == null)
 			return -1;
 		for(int i = 0; i < bitfield.length; i++){
@@ -146,6 +147,32 @@ public class TorrentHandler {
 	 * */
 	public int getPieceIndex(){
 		return pieceIndex;
+	}
+
+	public void save(Block block) {
+		Piece p = getPiece(block.getPiece());
+		if(p != null){
+			p.addBlock(block, block.getOffset() / MAX_PIECE_LENGTH);
+		}else{
+			int pLen = pieceLength(pieceIndex);
+			int numBlocks = pLen / MAX_PIECE_LENGTH;
+			if(pLen % MAX_PIECE_LENGTH > 0)
+				numBlocks++;
+			p = new Piece(numBlocks, pLen);
+			p.addBlock(block, block.getOffset() / MAX_PIECE_LENGTH);
+			save(p, block.getPiece());
+		}
+		byte[] data = p.getData();
+		if(data != null)
+			file.write(data, torInfo.piece_length * pieceIndex);
+	}
+	
+	public Piece getPiece(int index){
+		return this.pieces.get(index);
+	}
+
+	public void save(Piece p, int piece) {
+		this.pieces.put(piece, p);
 	}
 
 }
