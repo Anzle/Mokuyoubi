@@ -20,6 +20,7 @@ public class Peer{
 	private String peer_ip;
 	private int port_number;
 	private byte[] peer_id;
+	private byte[] info_hash;
 	
 	/*Our peer ID, foe handshakes*/
 	private byte[] my_id;
@@ -35,6 +36,7 @@ public class Peer{
 	private boolean alive;
 	private boolean busy;
 	private boolean[] bitfield;
+	
 	
 	
 	/** Peer creates a connects to a peer that we desire to download the file from.
@@ -57,14 +59,6 @@ public class Peer{
 		peer_choking = true;
 		peer_interested = false;
 		
-		//Commence the handshaking
-		to_peer.write(Message.handshake(info_hash, my_id));
-		to_peer.flush();
-		recieved_message = new byte[68];
-		from_peer.readFully(recieved_message);
-		
-		Message.validateHandshake(recieved_message, info_hash, peer_id);
-		
 		//At this point, the client should be ready to receive messages from the user. 
 		
 		
@@ -72,6 +66,29 @@ public class Peer{
 		busy = false;
 	}
 
+	public void sendHandshake(){
+		//Commence the handshaking
+		try {
+			to_peer.write(Message.handshake(info_hash, my_id));
+			to_peer.flush();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			System.err.println("This error brought to you by: Our Handshake");
+		}
+		try{
+			recieved_message = new byte[68];
+			from_peer.readFully(recieved_message);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			System.err.println("This error brought to you by: Handshake from Peer:" + peer_ip + " ID" + peer_id.toString());
+		}
+		if(!Message.validateHandshake(recieved_message, info_hash, peer_id))
+				System.err.println("Malformatted handshake from Peer:" + peer_ip + " ID" + peer_id.toString()+
+				"\nWe shouldn't talk to them anymore. . .");
+	}
+	
 	/** Sends a magical Columbidae to deliver our message to the connected Peer
 	 * If the bird is shot out of flight, print to the error stream
 	 * 
