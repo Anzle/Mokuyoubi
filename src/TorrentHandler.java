@@ -46,9 +46,35 @@ public class TorrentHandler {
 	 * 		false - an error was caught during execution causing the download to fail
 	 */
 	public boolean download(){
-		while(running){
-			ArrayList<Peer> peers = tracker.requestPeers(this);
+		ArrayList<Peer> peers = tracker.requestPeers(this);
 
+		Peer p = peers.get(0);
+		Thread t = new Thread(p);
+		System.out.println("new peer: " + p.getIP());
+		t.start();
+		
+		pieceIndex = getNextPiece(p);
+		while(running){
+			if(pieceIndex >= 0){
+				int offset = 0;
+				int pLen = pieceLength(pieceIndex);
+				int left = pLen;
+				int length = Math.min(MAX_PIECE_LENGTH, left);
+				int numBlocks = pLen / length;
+				if(pLen % length > 0)
+					numBlocks++;
+				Piece piece = new Piece(numBlocks, pLen);
+				int bindex = 0;
+				while(left > 0){
+					System.out.println("Block reqquested from " + p.getIP() + " - Piece " + pieceIndex + ", Block " + bindex);
+					p.requestBlock(pieceIndex, offset, length);
+				}
+				byte[] data = piece.getData();
+				if(data != null)
+					file.write(data, torInfo.piece_length * pieceIndex + offset);
+			}
+			
+			/*
 			for(Peer p : peers){
 				if(!currentPeers.contains(p)){
 					currentPeers.add(p);
@@ -84,6 +110,7 @@ public class TorrentHandler {
 					}
 				}
 			}
+			*/
 		}
 		
 		

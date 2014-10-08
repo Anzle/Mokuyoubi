@@ -89,7 +89,9 @@ public class Peer implements Runnable{
 			while (alive) {
 
 				int length = from_peer.readByte();
-				byte messageID = from_peer.readByte();
+				int messageID =((Byte) from_peer.readByte()).intValue();
+				
+				System.out.print(messageID);
 				
 				switch (messageID){
 				case 0:
