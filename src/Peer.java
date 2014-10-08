@@ -11,7 +11,7 @@ import java.net.Socket;
     Download the piece of the file and verify its SHA-1 hash against the hash stored in the metadata file. The first time you begin the download, you need to contact the tracker and let it know you are starting to download.
     After a piece is downloaded and verified, the peer is notified that you have completed the piece.
  */
-public class Peer{
+public class Peer implements Runnable{
 
 	private DataOutputStream to_peer;
 	private DataInputStream from_peer;
@@ -42,16 +42,16 @@ public class Peer{
 	/** Peer creates a connects to a peer that we desire to download the file from.
 	 * @throws an exception when attempting to connect. If it fails, the main file should try
 	 * to contact a separate peer or something*/
-	public Peer(String ipaddress, int port, byte[] my_id, byte[] info_hash, byte[] peer_id) throws Exception{
+	public Peer(String ipaddress, int port, byte[] my_id, byte[] info_hash, byte[] peer_id){
 		//peer connection information
 		peer_ip = ipaddress;
 		port_number = port;
+		this.info_hash = info_hash;
+		this.peer_id = peer_id;
+		this.my_id = my_id;
 		
 		//Establish connection with a peer
 		//System.out.println("Attempting to connect to:" + ipaddress);
-		peer_socket = new Socket(peer_ip, port_number);
-		to_peer = new DataOutputStream(peer_socket.getOutputStream());
-		from_peer = new DataInputStream(peer_socket.getInputStream());
 		
 		//Initial states of our peers
 		am_choking = true; // I am choking
@@ -62,8 +62,29 @@ public class Peer{
 		//At this point, the client should be ready to receive messages from the user. 
 		
 		
-		alive = true;
+		alive = false;
 		busy = false;
+	}
+
+	public void run(){
+		try {
+			connect();
+			alive = true;
+		} catch (IOException e) {
+			System.err.println("peer(" + peer_ip + ")" + e.getMessage());
+			return;
+		}
+		sendHandshake();
+		System.out.println("peer(" + peer_ip + ") connected");
+		this.interested();
+		System.out.println("peer(" + peer_ip + ") interested");
+		alive = true;
+	}
+	
+	private void connect() throws IOException{
+		peer_socket = new Socket(peer_ip, port_number);
+		to_peer = new DataOutputStream(peer_socket.getOutputStream());
+		from_peer = new DataInputStream(peer_socket.getInputStream());
 	}
 
 	public void sendHandshake(){
@@ -73,6 +94,7 @@ public class Peer{
 			to_peer.flush();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
+			System.err.println("peer(" + peer_ip + ")" + e.getMessage());
 			e.printStackTrace();
 			System.err.println("This error brought to you by: Our Handshake");
 		}
@@ -219,5 +241,27 @@ public class Peer{
 		byte[] have = Message.have;
 		have[2] = (byte)pieceIndex;
 		sendMessage(have);
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if(o instanceof Peer){
+			Peer p = (Peer) o;
+			
+			if(p.peer_ip.equals(this.peer_ip) && p.port_number == this.port_number){
+				return true;
+			}
+			
+			return false;
+			
+		}else if( o == this){
+			return true;
+		}else{
+			return false;
+		}
+	}
+
+	public String getIP() {
+		return this.peer_ip;
 	}
 }

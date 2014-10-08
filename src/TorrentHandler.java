@@ -45,12 +45,18 @@ public class TorrentHandler {
 	 */
 	public boolean download(){
 		while(running){
-
 			ArrayList<Peer> peers = tracker.requestPeers();
 
 			for(Peer p : peers){
-				if(!currentPeers.contains(p))
+				if(!currentPeers.contains(p)){
 					currentPeers.add(p);
+					Thread t = new Thread(p);
+					System.out.println("new peer: " + p.getIP());
+					t.start();
+					continue;
+				}
+				if(p.isAlive())
+					System.out.println("peer waiting... " + p.getIP() + " - " + p.isAlive() + " - " + p.isBusy());
 				if(p.isAlive() && !p.isBusy()){
 					pieceIndex = getNextPiece(p);
 					if(pieceIndex >= 0){
@@ -64,6 +70,7 @@ public class TorrentHandler {
 						Piece piece = new Piece(numBlocks, pLen);
 						int bindex = 0;
 						while(left > 0){
+							System.out.println("Block reqquested from " + p.getIP() + " - Piece " + pieceIndex + ", Block " + bindex);
 							Block b = p.requestBlock(pieceIndex, offset, length);
 							piece.addBlock(b, bindex);
 							offset += length;
