@@ -108,7 +108,7 @@ public class Tracker {
 				Peer newPeer = null;
 				try {
 					System.out.println("peer: " + ip);
-					newPeer = new Peer(ip, port, host.getPeerID().getBytes(), torinfo.info_hash.array());
+					newPeer = new Peer(ip, port, host.getPeerID().getBytes(), torinfo.info_hash.array(),pid_key.array());
 				} catch (Exception e) {
 					newPeer = null;
 					System.err.println("reason: " + e.getMessage());

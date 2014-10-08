@@ -40,7 +40,7 @@ public class Peer{
 	/** Peer creates a connects to a peer that we desire to download the file from.
 	 * @throws an exception when attempting to connect. If it fails, the main file should try
 	 * to contact a separate peer or something*/
-	public Peer(String ipaddress, int port, byte[] peer_id, byte[] info_hash, byte[] my_id) throws Exception{
+	public Peer(String ipaddress, int port, byte[] my_id, byte[] info_hash, byte[] peer_id) throws Exception{
 		//peer connection information
 		peer_ip = ipaddress;
 		port_number = port;
