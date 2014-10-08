@@ -41,7 +41,8 @@ public class TorrentHandler {
 	 * 		false - an error was caught during execution causing the download to fail
 	 */
 	public boolean download(){
-		
+		if(true)
+			return true;
 		while(running){
 
 			Vector<Peer> peers = tracker.requestPeers();

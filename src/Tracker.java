@@ -15,30 +15,39 @@ import GivenTools.BencodingException;
 import GivenTools.ToolKit;
 import GivenTools.TorrentInfo;
 
-
 public class Tracker {
 
-    private final String HEXCHARS = "0123456789ABCDEF";
-	
-	public Tracker(TorrentInfo alltinfo, PeerHost host) throws IOException{
-		
+	private final char[] HEXCHARS = "0123456789ABCDEF".toCharArray();
+
+	public Tracker(TorrentInfo alltinfo, PeerHost host) throws IOException {
+
 		URL url = alltinfo.announce_url;
-		
+
 		byte[] info_hash = alltinfo.info_hash.array();
 		String ih_str = "";
-				
+
 		StringBuilder sb = new StringBuilder(info_hash.length * 2);
-		for (byte b : info_hash)
-	        sb.append(HEXCHARS.charAt((b & 0xF0) >> 4))
-	            .append(HEXCHARS.charAt((b & 0x0F)));
-		ih_str = sb.toString();
+		for (int i = 0; i < info_hash.length; i++) {
+			if ((info_hash[i] & 0x80) == 0x80) { // if the byte data has the most
+												// significant byte set (e.g. it
+												// is negative)
+				ih_str += "%" + this.HEXCHARS[(info_hash[i] & 0xF0) >>> 4] + this.HEXCHARS[info_hash[i] & 0x0F];
+			} else {
+				try { // If the byte is a valid ascii character, use URLEncoder
+					ih_str += URLEncoder.encode(new String(new byte[] { info_hash[i] }), "UTF-8");
+				} catch (UnsupportedEncodingException e) {
+					System.out.println("URL formation error:" + e.getMessage());
+				}
+			}
+		}
 
 		String query = "announce?info_hash=" + ih_str + "&peer_id=" + host.getPeerID() + "&port=" + host.getPort() + "&left=" + alltinfo.file_length + "&uploaded=0&downloaded=0";
-		
+
 		System.out.println("file name: " + alltinfo.file_name);
 
-		//ToolKit.print(alltinfo.torrent_file_map);// this is only used to debug
-												// and print the map
+		// ToolKit.print(alltinfo.torrent_file_map);// this is only used to
+		// debug
+		// and print the map
 
 		// PART 3 STARTS HERE-
 
@@ -50,9 +59,9 @@ public class Tracker {
 		URL urlobj;
 
 		byte[] tracker_response = null;
-		
+
 		urlobj = new URL(url, query);
-		
+
 		System.out.println(urlobj.toString());
 
 		HttpURLConnection uconnect = (HttpURLConnection) urlobj.openConnection();
@@ -81,14 +90,14 @@ public class Tracker {
 		}
 		System.out.println("response from tracker in the form of byte[]: " + tracker_response);
 	}
-	
+
 	/**
 	 * retrieves a list of peers from the server
-	 * @return
-	 * 		list of currently connected peers
+	 * 
+	 * @return list of currently connected peers
 	 */
-	public Vector<Peer> requestPeers(){
-		//TODO 
+	public Vector<Peer> requestPeers() {
+		// TODO
 		return new Vector<Peer>();
 	}
 

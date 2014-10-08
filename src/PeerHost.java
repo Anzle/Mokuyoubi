@@ -17,15 +17,16 @@ public class PeerHost extends Thread{
 			try {
 				socket = new ServerSocket(port);
 				System.out.println("Listen port is: " + port);
+				break;
 			} catch (NumberFormatException e) {
-				/* DO NOTHING */
+				/* Nope */
 			} catch (IOException e) {
 				System.out.println("port " + port + " is in use");
 			}
 		}
 		
 
-		char[] chars = "abcdefghijklmnopqrstuvwxyz".toCharArray();
+		char[] chars = "0123456789ABCDEF".toCharArray();
 		StringBuilder sb = new StringBuilder();
 		Random random = new Random();
 		for (int i = 0; i < 20; i++) {
