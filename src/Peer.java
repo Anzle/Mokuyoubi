@@ -103,18 +103,20 @@ public class Peer implements Runnable {
 				byte[] data;
 				switch (messageID) {
 				case 0:
-					break;
-				case 1:
 					this.peer_choking = true;
 					break;
-				case 2:
+				case 1:
 					this.peer_choking = false;
 					break;
-				case 3:
+				case 2:
 					this.peer_interested = true;
 					break;
-				case 4:
+				case 3:
 					this.peer_interested = false;
+					break;
+				case 4:
+					int i = from_peer.readInt();
+					this.bitfield[i] = true;
 					break;
 				case 5:
 					data = new byte[length - 1];
