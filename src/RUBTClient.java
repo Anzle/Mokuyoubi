@@ -16,7 +16,18 @@ import GivenTools.BencodingException;
 import GivenTools.ToolKit;
 import GivenTools.TorrentInfo;
 
-public class main {
+/**
+ * @author Richard Gerdes
+ * @author Rahul Purwah
+ * @author Robert Williams, III
+ * 
+ * This is our implementation of the RUBT Client.
+ * This is the driver.
+ * We pray that our driver is never drunk.
+ * */
+
+
+public class RUBTClient {
 
 	public static void main(String[] args) {
 
