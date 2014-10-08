@@ -10,7 +10,7 @@ public class TorrentHandler {
 	
 	private TorrentInfo torInfo = null;
 	private Tracker tracker = null;
-	private Vector<Peer> currentPeers = null;
+	private ArrayList<Peer> currentPeers = null;
 	
 	private boolean[] bitfield;
 	private boolean error_death;
@@ -33,6 +33,7 @@ public class TorrentHandler {
 		this.running = true;
 		this.error_death = false;
 		this.file = new FileBuilder(outputfile, torInfo.file_length);
+		currentPeers = new ArrayList<Peer>();
 	}
 	
 	/**
@@ -47,8 +48,6 @@ public class TorrentHandler {
 
 			ArrayList<Peer> peers = tracker.requestPeers();
 
-			if(true)
-				return true;
 			for(Peer p : peers){
 				if(!currentPeers.contains(p))
 					currentPeers.add(p);
@@ -111,6 +110,8 @@ public class TorrentHandler {
 	 */
 	private int getNextPiece(Peer p) {
 		boolean[] peerBitfield = p.getBitfield();
+		if(peerBitfield == null)
+			return -1;
 		for(int i = 0; i < bitfield.length; i++){
 			if(!bitfield[i] && peerBitfield[i]){
 				return i;
