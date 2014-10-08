@@ -21,6 +21,9 @@ public class Peer{
 	private int port_number;
 	private byte[] peer_id;
 	
+	/*Our peer ID, foe handshakes*/
+	private byte[] my_id;
+	
 	//Who is accepting/looking for anything?
 	private boolean am_choking;
 	private boolean am_interested;
@@ -37,12 +40,13 @@ public class Peer{
 	/** Peer creates a connects to a peer that we desire to download the file from.
 	 * @throws an exception when attempting to connect. If it fails, the main file should try
 	 * to contact a separate peer or something*/
-	public Peer(String ipaddress, int port, byte[] peer_id, byte[] info_hash) throws Exception{
+	public Peer(String ipaddress, int port, byte[] peer_id, byte[] info_hash, byte[] my_id) throws Exception{
 		//peer connection information
 		peer_ip = ipaddress;
 		port_number = port;
 		
 		//Establish connection with a peer
+		//System.out.println("Attempting to connect to:" + ipaddress);
 		peer_socket = new Socket(peer_ip, port_number);
 		to_peer = new DataOutputStream(peer_socket.getOutputStream());
 		from_peer = new DataInputStream(peer_socket.getInputStream());
@@ -54,10 +58,11 @@ public class Peer{
 		peer_interested = false;
 		
 		//Commence the handshaking
-		to_peer.write(Message.handshake(info_hash, peer_id));
+		to_peer.write(Message.handshake(info_hash, my_id));
 		to_peer.flush();
 		from_peer.readFully(recieved_message);
-		Message.validateHandshake(recieved_message, info_hash);
+		
+		Message.validateHandshake(recieved_message, info_hash, peer_id);
 		
 		//At this point, the client should be ready to receive messages from the user. 
 		

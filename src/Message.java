@@ -70,12 +70,13 @@ public class Message {
 	}
 	
 	/** Check if the handshake message from a peer was a valid message. 
+	 * @param peer_id 
 	 * @param 
 	 * 		The handshake received from a peer
 	 * @return
 	 * 		True if it is valid, false otherwise
 	 * */
-	public static boolean validateHandshake(byte[] recieved_handshake,byte[] info_hash){
+	public static boolean validateHandshake(byte[] recieved_handshake,byte[] info_hash, byte[] peer_id){
 		
 		//Check if the message is the correct size
 		if(recieved_handshake.length != 68 )
@@ -88,7 +89,11 @@ public class Message {
 		for(int i=0; i<info_hash.length;i++)
 			if(recieved_handshake[28+i] != info_hash[i])
 				return false;
-		//If those check out... we will just assume the peerID is correct, for right now
+		//If those check out... peer_id
+		for(int i=0;i<20;i++)
+			if(recieved_handshake[48+i] != peer_id[i])
+				return false;
+		//All checks out good!
 		return true;
 	}
 	
