@@ -26,6 +26,7 @@ public class TorrentHandler {
 	 */
 	public TorrentHandler(TorrentInfo torInfo, Tracker tracker, String outputfile){
 		this.torInfo = torInfo;
+		this.tracker = tracker;
 		this.bitfield = new boolean[this.torInfo.piece_hashes.length];
 		this.running = true;
 		this.error_death = false;
@@ -73,7 +74,6 @@ public class TorrentHandler {
 							file.write(data, torInfo.piece_length * pieceIndex + offset);
 					}
 				}
-				
 			}
 		}
 		

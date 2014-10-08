@@ -9,6 +9,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.Random;
 
 import GivenTools.Bencoder2;
 import GivenTools.BencodingException;
@@ -76,81 +77,19 @@ public class main {
 
 		// tbytes is the byte array with all metainfo
 
-		URL getlist = null;
-
 		try {
 			TorrentInfo alltinfo = new TorrentInfo(tbytes);
-
-			System.out.println("file name: " + alltinfo.file_name);
-
-			getlist = alltinfo.announce_url;
-
-			ToolKit tkit = new ToolKit();
-
-			tkit.print(alltinfo.torrent_file_map);// this is only used to debug
-													// and print the map
-
-			// PART 3 STARTS HERE-
-
-			// Variable getlist is the URL to connect to
-
-			System.out.println("THE URL IS: " + getlist);
-
-			String inline = "";
-			URL urlobj;
-
-			byte[] tracker_response = null;
-
-			String toscrape = getlist.toString();
-			// _________________________________
-
-			String finalurl = "";
-			for (int i = 0; i < toscrape.length(); i++) {
-
-				String check = toscrape.substring(i, i + 8);
-
-				if (check.equals("announce")) {
-					finalurl = toscrape.substring(0, i) + "scrape";
-					break;
-				}
-			}
-			// __________________________________
+			PeerHost host = new PeerHost();
+			Tracker tracker = new Tracker(alltinfo, host);
+			TorrentHandler handler = new TorrentHandler(alltinfo, tracker, sfile);
+			handler.download();
 			
-			finalurl += "?info_hash=" + alltinfo.info_hash + "&left=" + alltinfo.file_length;
-			urlobj = new URL(finalurl);
 
-			HttpURLConnection uconnect = (HttpURLConnection) urlobj.openConnection();
-			uconnect.setRequestMethod("GET");
-
-			BufferedReader in = new BufferedReader(
-					new InputStreamReader(uconnect.getInputStream()));
-
-			StringBuffer response = new StringBuffer();
-
-			while ((inline = in.readLine()) != null) {
-
-				tracker_response = inline.getBytes();
-
-				System.out.println(inline);// prints stuff
-				response.append(inline);
-
-			}
-			in.close();
-			try {
-				HashMap h = (HashMap) Bencoder2.decode(response.toString().getBytes());
-				ToolKit.print(h);
-			} catch (BencodingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			System.out.println("response from tracker in the form of byte[]: " + tracker_response);
-
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
 		} catch (BencodingException e) {
 
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
