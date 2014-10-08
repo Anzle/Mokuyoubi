@@ -6,7 +6,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Vector;
 
@@ -18,15 +18,24 @@ import GivenTools.TorrentInfo;
 public class Tracker {
 
 	private final char[] HEXCHARS = "0123456789ABCDEF".toCharArray();
+	private TorrentInfo torinfo;
+	private PeerHost host;
+	private URL url;
+	private byte[] info_hash;
+	
+	ArrayList<Peer> peers;
 
-	public Tracker(TorrentInfo alltinfo, PeerHost host) throws IOException {
-
-		URL url = alltinfo.announce_url;
-
-		byte[] info_hash = alltinfo.info_hash.array();
+	public Tracker(TorrentInfo torinfo, PeerHost host) {
+		this.torinfo = torinfo;
+		this.host = host;
+		this.url = torinfo.announce_url;
+		info_hash = torinfo.info_hash.array();
+		
+	}
+	
+	private void getPeers() throws IOException{
 		String ih_str = "";
 
-		StringBuilder sb = new StringBuilder(info_hash.length * 2);
 		for (int i = 0; i < info_hash.length; i++) {
 			if ((info_hash[i] & 0x80) == 0x80) { // if the byte data has the most
 												// significant byte set (e.g. it
@@ -41,9 +50,9 @@ public class Tracker {
 			}
 		}
 
-		String query = "announce?info_hash=" + ih_str + "&peer_id=" + host.getPeerID() + "&port=" + host.getPort() + "&left=" + alltinfo.file_length + "&uploaded=0&downloaded=0";
+		String query = "announce?info_hash=" + ih_str + "&peer_id=" + host.getPeerID() + "&port=" + host.getPort() + "&left=" + torinfo.file_length + "&uploaded=0&downloaded=0";
 
-		System.out.println("file name: " + alltinfo.file_name);
+		System.out.println("file name: " + torinfo.file_name);
 
 		// ToolKit.print(alltinfo.torrent_file_map);// this is only used to
 		// debug
@@ -53,16 +62,14 @@ public class Tracker {
 
 		// Variable getlist is the URL to connect to
 
-		System.out.println("THE URL IS: " + url);
 
-		String inline = "";
 		URL urlobj;
 
 		byte[] tracker_response = null;
 
 		urlobj = new URL(url, query);
-
-		System.out.println(urlobj.toString());
+		
+		System.out.println("THE URL IS: " + urlobj.toString());
 
 		HttpURLConnection uconnect = (HttpURLConnection) urlobj.openConnection();
 		uconnect.setRequestMethod("GET");
@@ -72,23 +79,52 @@ public class Tracker {
 
 		StringBuffer response = new StringBuffer();
 
+		String inline = "";
 		while ((inline = in.readLine()) != null) {
 
 			tracker_response = inline.getBytes();
 
-			System.out.println(inline);// prints stuff
+			//System.out.println(inline);// prints stuff
 			response.append(inline);
 
 		}
 		in.close();
+		peers = new ArrayList<Peer>();
 		try {
-			HashMap h = (HashMap) Bencoder2.decode(response.toString().getBytes());
-			ToolKit.print(h);
+			HashMap<ByteBuffer, Object> h = (HashMap) Bencoder2.decode(response.toString().getBytes());
+			//ToolKit.print(h);
+			ByteBuffer b = ByteBuffer.wrap("peers".getBytes());
+
+			ByteBuffer ip_key = ByteBuffer.wrap("ip".getBytes());
+			ByteBuffer pid_key = ByteBuffer.wrap("peer id".getBytes());
+			ByteBuffer port_key = ByteBuffer.wrap("port".getBytes());
+			ArrayList<HashMap<ByteBuffer, Object>> list = (ArrayList<HashMap<ByteBuffer, Object>>) h.get(b);
+			for(HashMap<ByteBuffer, Object> p_info : list){
+				String ip = new String(((ByteBuffer) p_info.get(ip_key)).array());
+				byte[] pid = ((ByteBuffer) p_info.get(pid_key)).array();
+				int port = (int) p_info.get(port_key);
+				
+				Peer newPeer = null;
+				try {
+					System.out.println("peer: " + ip);
+					newPeer = new Peer(ip, port, pid, torinfo.info_hash.array());
+				} catch (Exception e) {
+					newPeer = null;
+					//e.printStackTrace();
+				}
+				
+				if(newPeer != null){
+					ToolKit.print(p_info);
+					peers.add(newPeer);
+				}
+			}
+			System.out.println("done");
 		} catch (BencodingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		System.out.println("response from tracker in the form of byte[]: " + tracker_response);
+		
 	}
 
 	/**
@@ -96,9 +132,15 @@ public class Tracker {
 	 * 
 	 * @return list of currently connected peers
 	 */
-	public Vector<Peer> requestPeers() {
+	public ArrayList<Peer> requestPeers() {
 		// TODO
-		return new Vector<Peer>();
+		try {
+			getPeers();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return peers;
 	}
 
 }

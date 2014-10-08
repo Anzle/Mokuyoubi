@@ -11,7 +11,7 @@ import java.net.Socket;
     Download the piece of the file and verify its SHA-1 hash against the hash stored in the metadata file. The first time you begin the download, you need to contact the tracker and let it know you are starting to download.
     After a piece is downloaded and verified, the peer is notified that you have completed the piece.
  */
-public class Peer implements Comparable<Peer>{
+public class Peer{
 
 	private DataOutputStream to_peer;
 	private DataInputStream from_peer;
@@ -158,29 +158,6 @@ public class Peer implements Comparable<Peer>{
 		sendMessage(message);
 		return readPeice();
 		//TODO
-	}
-
-	public boolean equals(Object o){
-		if (o == null || !(o instanceof Peer)) {
-			return false;
-		}
-
-		Peer peer = (Peer) o;
-		byte[] peerID = peer.peer_id;
-
-		for (int i = 0; i < this.peer_id.length; i++) {
-			if (this.peer_id[i] != peerID[i]) {
-				return false;
-			}
-		}
-
-		return true;
-	}
-
-	@Override
-	public int compareTo(Peer p) {
-		// TODO Auto-generated method stub
-		return 0;
 	}
 
 	/** Send this message to keep the Peer connection active; sent every two minutes if not other message sent*/

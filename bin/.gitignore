@@ -3,8 +3,8 @@
 /GivenTools
 /Message.class
 /Peer.class
+/PeerHost.class
 /Piece.class
 /TorrentHandler.class
 /Tracker.class
 /main.class
-/PeerHost.class

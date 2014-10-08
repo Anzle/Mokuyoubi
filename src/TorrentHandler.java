@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Vector;
 
 import GivenTools.TorrentInfo;
@@ -42,12 +43,12 @@ public class TorrentHandler {
 	 * 		false - an error was caught during execution causing the download to fail
 	 */
 	public boolean download(){
-		if(true)
-			return true;
 		while(running){
 
-			Vector<Peer> peers = tracker.requestPeers();
-			
+			ArrayList<Peer> peers = tracker.requestPeers();
+
+			if(true)
+				return true;
 			for(Peer p : peers){
 				if(!currentPeers.contains(p))
 					currentPeers.add(p);
