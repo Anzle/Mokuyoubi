@@ -60,6 +60,7 @@ public class Peer{
 		//Commence the handshaking
 		to_peer.write(Message.handshake(info_hash, my_id));
 		to_peer.flush();
+		recieved_message = new byte[68];
 		from_peer.readFully(recieved_message);
 		
 		Message.validateHandshake(recieved_message, info_hash, peer_id);
