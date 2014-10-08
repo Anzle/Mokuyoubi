@@ -208,5 +208,16 @@ public class Peer implements Comparable<Peer>{
 	 * */
 	public void uninterested(){
 		sendMessage(Message.uninterested);
-		this.am_interested = false;}
+		this.am_interested = false;
+	}
+	
+	/**Inform the Peer of our last downloaded piece
+	 * @param pieceIndex
+	 * 		the 0 based index of the last Piece we downloaded
+	 */
+	public void have(int pieceIndex){
+		byte[] have = Message.have;
+		have[2] = (byte)pieceIndex;
+		sendMessage(have);
+	}
 }

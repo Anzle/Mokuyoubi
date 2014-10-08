@@ -14,6 +14,7 @@ public class TorrentHandler {
 	private boolean[] bitfield;
 	private boolean error_death;
 	private boolean running;
+	private int pieceIndex;
 	
 	private FileBuilder file;
 	
@@ -51,7 +52,7 @@ public class TorrentHandler {
 				if(!currentPeers.contains(p))
 					currentPeers.add(p);
 				if(p.isAlive() && !p.isBusy()){
-					int pieceIndex = getNextPiece(p);
+					pieceIndex = getNextPiece(p);
 					if(pieceIndex >= 0){
 						int offset = 0;
 						int pLen = pieceLength(pieceIndex);
@@ -128,6 +129,14 @@ public class TorrentHandler {
 	 */
 	public boolean savePiece(int piece, byte[] data){
 		return file.write(data, piece * torInfo.piece_length);
+	}
+	
+	/** Return's the current Piece Index for the have message
+	 * @return
+	 * 		the current pieteIndex as an integer
+	 * */
+	public int getPieceIndex(){
+		return pieceIndex;
 	}
 
 }

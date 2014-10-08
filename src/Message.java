@@ -36,6 +36,8 @@ public class Message {
 	public static byte[] intrested = {1,2};
 	/**show lack of interest in what the peer has to offer*/
 	public static byte[] uninterested = {1,3};
+	/**Tell the peer the 0-based index of the last piece downloaded*/
+	public static byte[] have = {5,4,0};
 	
 	
 	/*The beginning of the handshake: this is always the same*/
@@ -92,7 +94,7 @@ public class Message {
 	
 	/**
 	 * Generate the block request message to request part of a block from the peer
-	 * @param pieceIndex piece of the file to download part of
+	 * @param pieceIndex piece of the fileThe to download part of
 	 * @param pieceOffset distance into the piece to start downloading
 	 * @param length length in bytes of data to download starting at the offset
 	 * @return byte array of the finished message
