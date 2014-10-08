@@ -109,6 +109,8 @@ public class main{
 	String inline=""; 
 	URL urlobj;
 	
+	byte[] tracker_response=null;
+	
 	try {
 		
 		String toscrape=getlist.toString();
@@ -130,15 +132,19 @@ public class main{
 	
      HttpURLConnection uconnect = (HttpURLConnection) urlobj.openConnection();
      uconnect.setRequestMethod("GET");
-     //int responseCode = uconnect.getResponseCode();
 
      BufferedReader in = new BufferedReader(
              new InputStreamReader(uconnect.getInputStream()));
      
      StringBuffer response = new StringBuffer();
 
+     
+     
      while ((inline = in.readLine()) != null) {
-         System.out.println(inline);//prints stuff
+         
+    	 tracker_response=inline.getBytes();
+    	 
+    	 System.out.println(inline);//prints stuff
     	 response.append(inline);
          
      }
@@ -149,6 +155,9 @@ public class main{
 	} catch (IOException e) {
 		e.printStackTrace();
 	}
+	
+	System.out.println("response from tracker in the form of byte[]: "+tracker_response);
+	
 	
 	
 	
