@@ -99,6 +99,7 @@ public class Tracker {
 			ByteBuffer pid_key = ByteBuffer.wrap("peer id".getBytes());
 			ByteBuffer port_key = ByteBuffer.wrap("port".getBytes());
 			ArrayList<HashMap<ByteBuffer, Object>> list = (ArrayList<HashMap<ByteBuffer, Object>>) h.get(b);
+			System.out.println("peer count: " + list.size());
 			for(HashMap<ByteBuffer, Object> p_info : list){
 				String ip = new String(((ByteBuffer) p_info.get(ip_key)).array());
 				byte[] pid = ((ByteBuffer) p_info.get(pid_key)).array();
@@ -107,10 +108,12 @@ public class Tracker {
 				Peer newPeer = null;
 				try {
 					System.out.println("peer: " + ip);
-					newPeer = new Peer(ip, port, pid, torinfo.info_hash.array());
+					newPeer = new Peer(ip, port, host.getPeerID().getBytes(), torinfo.info_hash.array());
 				} catch (Exception e) {
 					newPeer = null;
-					//e.printStackTrace();
+					System.err.println("reason: " + e.getMessage());
+					e.printStackTrace();
+					System.out.println("peer failed");
 				}
 				
 				if(newPeer != null){
