@@ -106,10 +106,27 @@ public class main{
 	
 	System.out.println("THE URL IS: "+getlist);
 	
-	 
+	String inline=""; 
 	URL urlobj;
+	
 	try {
-		urlobj = new URL(getlist.toString());
+		
+		String toscrape=getlist.toString();
+		//_________________________________
+		
+		String finalurl="";
+		for(int i=0;i<toscrape.length();i++){
+			
+			String check=toscrape.substring(i,i+8);
+			
+			if(check.equals("announce")){
+				finalurl=toscrape.substring(0, i)+"scrape";
+				break;
+			}
+		}
+		//__________________________________
+		
+		urlobj = new URL(finalurl);
 	
      HttpURLConnection uconnect = (HttpURLConnection) urlobj.openConnection();
      uconnect.setRequestMethod("GET");
@@ -117,11 +134,13 @@ public class main{
 
      BufferedReader in = new BufferedReader(
              new InputStreamReader(uconnect.getInputStream()));
-     String inline;
+     
      StringBuffer response = new StringBuffer();
 
      while ((inline = in.readLine()) != null) {
-         response.append(inline);
+         System.out.println(inline);//prints stuff
+    	 response.append(inline);
+         
      }
      in.close(); 
      
@@ -130,6 +149,7 @@ public class main{
 	} catch (IOException e) {
 		e.printStackTrace();
 	}
+	
 	
 	
 	}
