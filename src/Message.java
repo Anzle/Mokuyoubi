@@ -78,21 +78,35 @@ public class Message {
 	 * */
 	public static boolean validateHandshake(byte[] recieved_handshake,byte[] info_hash, byte[] peer_id){
 		
+		for(int i=0;i< peer_id.length;i++){
+			System.out.print(peer_id[i]);
+		}
 		//Check if the message is the correct size
-		if(recieved_handshake.length != 68 )
+		if(recieved_handshake.length != 68 ){
+			System.err.println("validateHandshake, length");
 			return false;
+		}
 		//Check if it has the proper heading
-		for(int i=0;i<handshake_header.length;i++)
-			if(recieved_handshake[i] != handshake_header[i])
+		for(int i=0;i<handshake_header.length;i++){
+			if(recieved_handshake[i] != handshake_header[i]){
+				System.err.println("validateHandshake, header: " + i);
 				return false;
+			}
+		}
 		//Check if it has the correct SHA1 hash
-		for(int i=0; i<info_hash.length;i++)
-			if(recieved_handshake[28+i] != info_hash[i])
+		for(int i=0; i<info_hash.length;i++){
+			if(recieved_handshake[28+i] != info_hash[i]){
+				System.err.println("validateHandshake, info_hash");
 				return false;
+			}
+		}
 		//If those check out... peer_id
-		for(int i=0;i<20;i++)
-			if(recieved_handshake[48+i] != peer_id[i])
+		for(int i=0;i<20;i++){
+			if(recieved_handshake[48+i] != peer_id[i]){
+				System.err.println("validateHandshake, peer_id");
 				return false;
+			}
+		}
 		//All checks out good!
 		return true;
 	}

@@ -108,7 +108,9 @@ public class Tracker {
 				Peer newPeer = null;
 				try {
 					System.out.println("peer: " + ip);
-					newPeer = new Peer(ip, port, host.getPeerID().getBytes(), torinfo.info_hash.array(),pid_key.array());
+					newPeer = new Peer(ip, port, host.getPeerID().getBytes(), torinfo.info_hash.array(), pid_key.array());
+				//Make the Peer send the handshake message
+					newPeer.sendHandshake();
 				} catch (Exception e) {
 					newPeer = null;
 					System.err.println("reason: " + e.getMessage());

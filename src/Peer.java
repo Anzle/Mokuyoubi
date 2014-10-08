@@ -46,6 +46,9 @@ public class Peer{
 		//peer connection information
 		peer_ip = ipaddress;
 		port_number = port;
+		this.info_hash = info_hash;
+		this.peer_id = peer_id;
+		this.my_id = my_id;
 		
 		//Establish connection with a peer
 		//System.out.println("Attempting to connect to:" + ipaddress);
@@ -68,6 +71,7 @@ public class Peer{
 
 	public void sendHandshake(){
 		//Commence the handshaking
+		recieved_message = new byte[68];
 		try {
 			to_peer.write(Message.handshake(info_hash, my_id));
 			to_peer.flush();
@@ -77,7 +81,6 @@ public class Peer{
 			System.err.println("This error brought to you by: Our Handshake");
 		}
 		try{
-			recieved_message = new byte[68];
 			from_peer.readFully(recieved_message);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
